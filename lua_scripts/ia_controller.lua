@@ -1,18 +1,13 @@
--- ==============================================================================
--- ARQUIVO: ia_controller.lua (Versão Final - Com Auto Reset na Tela de Continue)
--- ==============================================================================
+-- ARQUIVO: ia_controller.lua
 
 local estadoFile = "game_state.csv"
 local acaoFile = "action.csv"
 local header_written = false
 
--- ==============================================================================
--- ⚙️ CONFIGURAÇÃO DE MEMÓRIA (Seus Endereços Confirmados)
--- ==============================================================================
+--CONFIGURAÇÃO DE MEMÓRIA
 local ADDR_X      = 0x004A  -- Posição X
 local ADDR_Y      = 0x0D54  -- Posição Y
 local ADDR_VIDAS  = 0x0D7D  -- Vidas
--- ==============================================================================
 
 -- Variáveis para detectar se a IA travou (Game Over / Menu)
 local last_x = 0
@@ -74,7 +69,7 @@ function executar_acao(acao)
         -- === BOTÃO DE BOMBA (A) ===
         joypad.set({A = true}, 1)
         
-        gui.text(50, 50, "BOMBA (A)!", "red")
+        gui.text(50, 50, "BOMBA (A)!")
         
         -- Timing estendido (3 frames) para garantir que solte a bomba
         emu.frameadvance()
@@ -108,14 +103,14 @@ function verificar_travamento()
         gui.text(10, 100, "Parado: " .. frames_parado, "orange")
     end
 
-    -- REGRA DE RESET:
+    -- RESET:
     -- 1. Se ficar parado por 300 frames (5 segundos) -> Assume que travou no Menu/Continue
     -- 2. OU Se tiver 0 vidas e ficar parado um pouco -> Assume que morreu
     if frames_parado > 300 or (vidas == 0 and frames_parado > 60) then
         print("💀 RESETANDO JOGO (Inatividade ou Morte detetada)...")
         gui.text(50, 100, "RESETANDO...", "red")
         
-        -- Carrega o SaveState 1 (VOCÊ PRECISA TER SALVO ELE ANTES!)
+        -- Carrega o SaveState 1 quando perder todas as vidas
         savestate.loadslot(1)
         
         -- Reseta variáveis
@@ -129,7 +124,7 @@ function verificar_travamento()
 end
 
 -- Inicialização
-print("🤖 Script Bomberman Pronto!")
+print(" Iniciando!")
 print("Endereços: X=" .. string.format("%X", ADDR_X) .. " Y=" .. string.format("%X", ADDR_Y) .. " Vidas=" .. string.format("%X", ADDR_VIDAS))
 gui.clearGraphics()
 

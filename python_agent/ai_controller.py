@@ -8,11 +8,8 @@ import random
 import math
 import numpy as np
 
-# ==============================================================================
-# ⚙️ CONFIGURAÇÕES
-# ==============================================================================
+#CONFIGURAÇÕES
 BASE_DIR = r"C:\Users\Dellarosa\Desktop\AI-Player\lua_scripts"
-
 STATE_FILE = os.path.join(BASE_DIR, "game_state.csv")
 ACTION_FILE = os.path.join(BASE_DIR, "action.csv")
 MODEL_FILE = os.path.join(BASE_DIR, "bomberman_brain.pth")
@@ -28,9 +25,7 @@ EPS_START = 0.9
 EPS_END = 0.05
 EPS_DECAY = 10000 # Aumentei para ela explorar mais
 
-# ==============================================================================
-# 🧠 REDE NEURAL (DQN)
-# ==============================================================================
+# REDE NEURAL (DQN)
 class DQN(nn.Module):
     def __init__(self, input_size, output_size):
         super(DQN, self).__init__()
@@ -57,9 +52,7 @@ def select_action(state, policy_net, steps_done):
     else:
         return torch.tensor([[random.randrange(OUTPUT_SIZE)]], dtype=torch.long)
 
-# ==============================================================================
-# 🚀 INICIALIZAÇÃO
-# ==============================================================================
+#INICIALIZAÇÃO
 policy_net = DQN(INPUT_SIZE, OUTPUT_SIZE)
 optimizer = optim.Adam(policy_net.parameters(), lr=1e-3)
 steps_done = 0
@@ -74,23 +67,21 @@ prev_y = None
 stuck_steps = 0 
 
 if os.path.exists(MODEL_FILE):
-    print(f"🧠 Cérebro carregado: {MODEL_FILE}")
+    print(f" MODELO CARREGADO: {MODEL_FILE}")
     try:
         checkpoint = torch.load(MODEL_FILE)
         policy_net.load_state_dict(checkpoint['model_state'])
         optimizer.load_state_dict(checkpoint['optimizer_state'])
         steps_done = checkpoint['steps']
-        print(f"✅ Nível: {steps_done} passos.")
+        print(f"Nível: {steps_done} passos.")
     except:
-        print("⚠️ Erro ao carregar, criando novo.")
+        print("Erro ao carregar, criando novo.")
 else:
-    print("✨ Iniciando IA do Zero...")
+    print("Iniciando a primeira vez...")
 
-print("🚀 IA Rodando com Punição de Parede Ativada!")
+print(" IA Rodando com Punição de Parede Ativada!")
 
-# ==============================================================================
-# 🔄 LOOP
-# ==============================================================================
+#LOOP
 while True:
     if not os.path.exists(STATE_FILE):
         time.sleep(0.1)
@@ -122,13 +113,13 @@ while True:
         cur_y = current_state_list[1]
         cur_vidas = current_state_list[3]
 
-        # --- CÁLCULO DE RECOMPENSA (TUNADO) ---
+        # --- CÁLCULO DE RECOMPENSA ---
         reward = 0.1 # Sobrevivência base
         
         if prev_vidas is not None:
             # 1. MORTE REAL
             if cur_vidas < prev_vidas:
-                print("💀 MORREU! (-100)")
+                print("MORREU!(-100)")
                 reward = -100.0
                 stuck_steps = 0 # Reseta contador se morreu
             
@@ -143,7 +134,7 @@ while True:
                     
                     # Se ficar presa por 30 frames (meio segundo), considera "Morte Técnica"
                     if stuck_steps > 30:
-                        print("🧱 PRESA NA PAREDE! (-50 e Reset de Estratégia)")
+                        print("PRESA NA PAREDE! (-50 e Reset de Estratégia)")
                         reward = -50.0
                         stuck_steps = 0 # Reseta para não punir infinitamente
                 else:
@@ -169,7 +160,7 @@ while True:
         
         # Save
         if steps_done % 500 == 0:
-            print(f"💾 Salvando... (Passo {steps_done})")
+            print(f"Salvando (Passo {steps_done})")
             torch.save({
                 'model_state': policy_net.state_dict(),
                 'optimizer_state': optimizer.state_dict(),
@@ -179,9 +170,9 @@ while True:
         # Log
         if steps_done % 50 == 0:
             eps = EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps_done / EPS_DECAY)
-            modo = "🎲" if random.random() < eps else "🧠"
+            modo = "Chutando" if random.random() < eps else "Pensando"
             print(f"Passo: {steps_done} | Vidas: {int(cur_vidas)} | Ação: {action_str} {modo} | Reward: {reward:.2f}")
 
     except Exception as e:
-        print(f"⚠️ Erro: {e}")
+        print(f"Erro: {e}")
         time.sleep(1)
